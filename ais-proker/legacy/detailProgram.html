@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Program Kerja</title>
+    <!-- Kita akan menggunakan style yang mirip dengan halaman utama -->
+    <?!= include('Stylesheet'); ?>
+    <style>
+        /* Style tambahan khusus untuk halaman detail */
+        .detail-card {
+            margin-bottom: 15px;
+        }
+
+        .detail-card h3 {
+            color: #2c5530;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .detail-card p {
+            margin: 0;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        .currency {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <!-- Anda bisa menggunakan header yang sama atau yang lebih simpel -->
+            <h1>Detail Program Kerja</h1>
+        </div>
+
+        <!-- Tombol untuk kembali ke halaman utama -->
+        <a href="<?= ScriptApp.getService().getUrl(); ?>" class="btn btn-secondary back-button"><i
+                class="fas fa-arrow-left"></i> Kembali ke Dashboard</a>
+
+        <div id="detailContent" class="content-section active">
+            <!-- Konten detail akan dimuat di sini oleh JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // ID program kerja yang dikirim dari doGet
+        const programId = "<?= programId ?>";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDetailData();
+        });
+
+        function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+
+        function loadDetailData() {
+            showLoader();
+            google.script.run
+                .withSuccessHandler(onDataReceived)
+                .withFailureHandler(onError)
+                .getProgramById(programId);
+        }
+
+        function onDataReceived(response) {
+            if (response.success) {
+                renderDetail(response.data);
+            } else {
+                document.getElementById('detailContent').innerHTML = `<h2>Error</h2><p>${response.message}</p>`;
+            }
+            hideLoader();
+        }
+
+        function onError(error) {
+            document.getElementById('detailContent').innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
+            hideLoader();
+        }
+
+        function renderDetail(item) {
+            const content = document.getElementById('detailContent');
+            // Format anggaran menjadi format mata uang Rupiah
+            const formattedAnggaran = `Rp ${Number(item.anggaran || 0).toLocaleString('id-ID')}`;
+
+            content.innerHTML = `
+            <h2>${item.nama}</h2>
+            <div class="responsive-grid" style="margin-top: 20px;">
+                <div class="card detail-card">
+                    <h3>Deskripsi Program</h3>
+                    <p>${item.deskripsi.replace(/\n/g, '<br>')}</p>
+                </div>
+                <div class="card detail-card">
+                    <h3>Penanggung Jawab (PJ)</h3>
+                    <p>${item.pj}</p>
+                </div>
+                <div class="card detail-card">
+                    <h3>Timeline Pelaksanaan</h3>
+                    <p>${item.timeline}</p>
+                </div>
+                <div class="card detail-card">
+                    <h3>Anggaran</h3>
+                    <p class="currency">${formattedAnggaran}</p>
+                </div>
+            </div>
+            <div class="card detail-card">
+                <h3>Indikator Keberhasilan</h3>
+                <p>${item.indikator.replace(/\n/g, '<br>')}</p>
+            </div>
+             <div class="card detail-card">
+                <h3>Catatan Tambahan</h3>
+                <p>${item.catatan.replace(/\n/g, '<br>')}</p>
+            </div>
+        `;
+        }
+    </script>
+</body>
+
+</html>

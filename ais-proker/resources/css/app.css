@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+
+    --color-primary: #0066FF;
+    --color-primary-hover: #0052cc;
+    --color-primary-dark: #0047b3;
+    --color-accent-blue: #0080FF;
+    --color-accent-blue-light: #33B5FF;
+
+    /* LIGHT MODE (Default) */
+    --color-dark-bg: #f8fafc;
+    --color-dark-card: #FFFFFF;
+    --color-dark-lighter: #f1f5f9;
+
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+}
+
+.dark,
+body.dark {
+    /* DARK MODE */
+    --color-dark-bg: #0B0E14;
+    --color-dark-card: #151B25;
+    --color-dark-lighter: #1E2532;
+
+    --text-main: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --border-color: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    font-family: var(--font-sans);
+}
+
+.dark ::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.dark input[type="date"] {
+    color-scheme: dark;
+}
+
+.glass {
+    background: var(--color-dark-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+
+.glow-text {
+    text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+}
+
+.text-theme-main {
+    color: var(--text-main);
+}
+
+.text-theme-muted {
+    color: var(--text-muted);
+}
+
+.border-theme {
+    border-color: var(--border-color);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 102, 255, 0.3);
+    border-radius: 2px;
+}

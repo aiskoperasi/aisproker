@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        <? !=includeForPdf('StylesheetPdf');
+        ?>
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Program Kerja Umum</h1>
+        <h1>An Nahl Islamic School</h1>
+        <p>Tahun Pelajaran 2025-2026</p>
+        <p class="export-date">Dokumen diekspor pada:
+            <?= new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'long' }) ?>
+        </p>
+    </div>
+
+    <!-- Visi & Misi -->
+    <div class="section">
+        <h2>Visi & Misi</h2>
+        <h3>Visi</h3>
+        <p class="visi-text">
+            <?= data.visi ?>
+        </p>
+        <h3>Misi</h3>
+        <ol>
+            <? for (var i = 0; i < data.misi.length; i++) { ?>
+            <li>
+                <?= data.misi[i] ?>
+            </li>
+            <? } ?>
+        </ol>
+    </div>
+
+    <!-- Sasaran Mutu -->
+    <div class="section">
+        <h2>Sasaran Mutu</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Sasaran Mutu</th>
+                    <th>Target</th>
+                    <th>Periode</th>
+                    <th>Metode</th>
+                </tr>
+            </thead>
+            <tbody>
+                <? for (var i = 0; i < data.sasaran.length; i++) { ?>
+                <tr>
+                    <td>
+                        <?= i + 1 ?>
+                    </td>
+                    <td>
+                        <?= data.sasaran[i].sasaran ?>
+                    </td>
+                    <td>
+                        <?= data.sasaran[i].target ?>%
+                    </td>
+                    <td>
+                        <?= data.sasaran[i].periode ?>
+                    </td>
+                    <td>
+                        <?= data.sasaran[i].metode ?>
+                    </td>
+                </tr>
+                <? } ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- TAMBAHKAN BLOK STRUKTUR ORGANISASI DI SINI -->
+    <!-- ============================================= -->
+    <div class="section">
+        <h2>Struktur Organisasi</h2>
+        <div class="org-chart">
+            <div class="org-level">
+                <div class="org-box">
+                    <strong>Kepala Bagian</strong><br>
+                    <?= data.struktur.kepalaBagian ?>
+                </div>
+            </div>
+            <div class="org-level">
+                <? for (var i = 0; i < data.struktur.koordinator.length; i++) { ?>
+                <div class="org-box coordinator">
+                    <strong>
+                        <?= data.struktur.koordinator[i].jabatan ?>
+                    </strong><br>
+                    <?= data.struktur.koordinator[i].nama ?>
+                </div>
+                <? } ?>
+            </div>
+            <div class="org-level">
+                <? for (var i = 0; i < data.struktur.tim.length; i++) { ?>
+                <div class="org-box member">
+                    <?= data.struktur.tim[i] ?>
+                </div>
+                <? } ?>
+            </div>
+        </div>
+    </div>
+    <!-- Program Kerja -->
+    <div class="section">
+        <h2>Program Kerja</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Program</th>
+                    <th>Deskripsi</th>
+                    <th>PJ</th>
+                    <th>Unit</th>
+                    <th>Timeline</th>
+                </tr>
+            </thead>
+            <tbody>
+                <? for (var i = 0; i < data.program.length; i++) { ?>
+                <tr>
+                    <td>
+                        <?= i + 1 ?>
+                    </td>
+                    <td>
+                        <?= data.program[i].nama ?>
+                    </td>
+                    <td>
+                        <?= data.program[i].deskripsi ?>
+                    </td>
+                    <td>
+                        <?= data.program[i].pj ?>
+                    </td>
+                    <td>
+                        <?= data.program[i].unit ?>
+                    </td>
+                    <td>
+                        <?= data.program[i].timeline ?>
+                    </td>
+                </tr>
+                <? } ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- APBS -->
+    <div class="section">
+        <h2>Rencana Anggaran (APBS)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Uraian</th>
+                    <th>Anggaran (Rp)</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <? var totalAnggaran = 0; ?>
+                <? for (var i = 0; i < data.apbs.length; i++) { ?>
+                <? totalAnggaran += Number(data.apbs[i].anggaran || 0); ?>
+                <tr>
+                    <td>
+                        <?= data.apbs[i].kode ?>
+                    </td>
+                    <td>
+                        <?= data.apbs[i].uraian ?>
+                    </td>
+                    <td class="currency">
+                        <?= Number(data.apbs[i].anggaran || 0).toLocaleString('id-ID') ?>
+                    </td>
+                    <td>
+                        <?= data.apbs[i].keterangan ?>
+                    </td>
+                </tr>
+                <? } ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">TOTAL ANGGARAN</th>
+                    <th class="currency">
+                        <?= totalAnggaran.toLocaleString('id-ID') ?>
+                    </th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</body>
+
+</html>

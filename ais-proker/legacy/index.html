@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Program Kerja Umum - An Nahl Islamic School 2025-2026</title>
+    <?!= include('Stylesheet'); ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        <!-- Cari div dengan class "header" -->
+        <div class="header">
+            <!-- TAMBAHKAN BLOK INI -->
+            <div class="header-content">
+                <img src="https://drive.google.com/thumbnail?id=1yXxeMMuQXt18Q8DWGz7gJ4UsWCaVnrYT" alt="Logo Sekolah"
+                    class="header-logo">
+                <div class="header-text">
+                    <h1>An Nahl Islamic School</h1>
+                    <p>Program Kerja Umum Tahun Pelajaran 2025-2026</p>
+                </div>
+            </div>
+            <!-- TAMBAHKAN TOMBOL EKSPOR DI SINI -->
+            <div class="header-actions">
+                <button id="exportPdfBtn" class="btn btn-primary" onclick="exportToPdf()">
+                    <i class="fas fa-file-pdf"></i> Ekspor ke PDF
+                </button>
+            </div>
+        </div>
+
+
+        <!-- MODIFIKASI: Navigasi Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="showSection('visiMisi')">Visi & Misi</button>
+            <button class="nav-tab" onclick="showSection('sasaran')">Sasaran Mutu</button>
+            <button class="nav-tab" onclick="showSection('struktur')">Struktur</button>
+            <button class="nav-tab" onclick="showSection('program')">Program Kerja</button>
+            <button class="nav-tab" onclick="showSection('apbs')">APBS</button>
+        </div>
+
+        <!-- PERBAIKAN: Konten Dashboard Diisi Kembali -->
+        <div id="dashboard" class="content-section active">
+            <h2>Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalSasaran">0</div>
+                    <div>Total Sasaran Mutu</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalProgram">0</div>
+                    <div>Program Kerja</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalAnggaran">0</div>
+                    <div>Total Anggaran (Juta)</div>
+                </div>
+            </div>
+            <!-- ======================================= -->
+            <!-- TAMBAHKAN BLOK GRAFIK DI SINI -->
+            <!-- ======================================= -->
+            <div class="chart-container card">
+                <h3>Alokasi Anggaran per Kategori</h3>
+                <!-- BUNGKUS CANVAS DALAM DIV BARU -->
+                <div class="chart-wrapper">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+            <!-- ======================================= -->
+
+            <div class="card">
+                <h3>Ringkasan Program Kerja Unggulan</h3>
+                <div id="dashboardProgramList">
+                    <!-- Ringkasan program akan diisi oleh Javascript jika diperlukan -->
+                    <div class="program-item">
+                        <strong>Pengadaan, Perbaikan Gedung dan Sarana Prasarana</strong>
+                        <p>Target pencapaian 90% dengan fokus pada perbaikan gedung dan fasilitas KBM</p>
+                    </div>
+                    <div class="program-item">
+                        <strong>Pengadaan Barang dan Jasa</strong>
+                        <p>Target pencapaian 95% dengan implementasi sistem digital</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODIFIKASI: Section Visi & Misi Digabung -->
+        <div id="visiMisi" class="content-section">
+            <h2>Visi & Misi Sekolah</h2>
+
+            <!-- Kontainer Visi -->
+            <div class="card">
+                <h3>Visi Sekolah</h3>
+                <button class="btn btn-primary" onclick="openModal('visiModal')"><i class="fas fa-edit"></i> Edit
+                    Visi</button>
+                <div id="visiContent"
+                    style="margin-top:20px; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+                    <!-- Visi akan dimuat di sini -->
+                </div>
+            </div>
+
+            <!-- Kontainer Misi -->
+            <div class="card" style="margin-top: 30px;">
+                <h3>Misi Sekolah</h3>
+                <button class="btn btn-primary" onclick="openModal('misiModal')"><i class="fas fa-plus"></i> Tambah
+                    Misi</button>
+                <div id="misiList" style="margin-top:20px;">
+                    <!-- Daftar Misi akan dimuat di sini -->
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Sasaran Mutu Section (Tidak Berubah) -->
+        <div id="sasaran" class="content-section">
+            <h2>Sasaran Mutu</h2>
+            <button class="btn btn-primary" onclick="openModal('sasaranModal')"><i class="fas fa-plus"></i> Tambah
+                Sasaran Mutu</button>
+            <div class="table-container">
+                <table class="table" id="sasaranTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Sasaran Mutu</th>
+                            <th>Target</th>
+                            <th>Periode</th>
+                            <th>Metode</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sasaranTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PERBAIKAN: Konten Struktur Diisi Kembali -->
+        <div id="struktur" class="content-section">
+            <h2>Struktur Organisasi</h2>
+            <div class="card">
+                <!-- <p><i>Konten struktur organisasi saat ini bersifat statis. Untuk membuatnya dinamis, diperlukan sheet dan logika tambahan.</i></p> -->
+                <div class="organization-chart">
+                    <div class="org-level">
+                        <div class="org-box">Kepala Bagian<br>Slamet Haryadi</div>
+                    </div>
+                    <div class="org-level">
+                        <div class="org-box org-coordinator">Koordinator OB<br>Masdik</div>
+                        <div class="org-box org-coordinator">Koordinator Sarpras<br>Anen</div>
+                        <div class="org-box org-coordinator">Koordinator Security<br>Jaka</div>
+                    </div>
+                    <div class="org-level">
+                        <div class="org-box org-member">Tim OB</div>
+                        <div class="org-box org-member">Tim Security</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Program Kerja Section (Tidak Berubah) -->
+        <div id="program" class="content-section">
+            <h2>Program Kerja</h2>
+            <button class="btn btn-primary" onclick="openModal('programModal')"><i class="fas fa-plus"></i> Tambah
+                Program Kerja</button>
+            <!-- ======================================= -->
+            <!-- TAMBAHKAN BLOK FILTER DI SINI -->
+            <!-- ======================================= -->
+            <div class="filter-container">
+                <input type="text" id="searchInput" class="search-input" onkeyup="applyFilters()"
+                    placeholder="Cari berdasarkan nama, deskripsi, pj...">
+                <select id="unitFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="">Semua Unit</option>
+                    <option value="PGTK">PGTK</option>
+                    <option value="SD">SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA">SMA</option>
+                    <option value="Litbang & SMM">Litbang & SMM</option>
+                    <option value="Keuangan & Marketing">Keuangan & Marketing</option>
+                    <option value="Umum">Umum</option>
+                    <option value="Ecopark">Ecopark</option>
+                </select>
+            </div>
+            <!-- ======================================= -->
+            <div class="table-container">
+                <table class="table" id="programTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Program</th>
+                            <th>Deskripsi</th>
+                            <th>PJ</th>
+                            <th>Unit</th> <!-- TAMBAHKAN INI -->
+                            <th>Timeline</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="programTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- APBS Section (Tidak Berubah) -->
+        <div id="apbs" class="content-section">
+            <h2>Rencana Anggaran Pendapatan dan Belanja Sekolah (RAPBS)</h2>
+            <button class="btn btn-primary" onclick="openModal('apbsModal')"><i class="fas fa-plus"></i> Tambah Item
+                APBS</button>
+            <div class="table-container">
+                <table class="table" id="apbsTable">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Uraian</th>
+                            <th>Anggaran (Rp)</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apbsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Total Anggaran: <span id="totalAnggaran2">Rp 0</span></h3>
+            </div>
+        </div>
+    </div>
+    <!-- Semua Modal di sini (tidak ada perubahan besar pada struktur modal) -->
+    <!-- Visi, Misi, Sasaran, Program, APBS Modals... -->
+
+    <!-- Memasukkan JavaScript dari file terpisah -->
+    <!-- ================= MODALS ================= -->
+
+    <!-- Visi Modal -->
+    <div id="visiModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('visiModal')">×</span>
+            <h2>Edit Visi</h2>
+            <div class="form-group">
+                <label for="visiInput">Visi Sekolah</label>
+                <textarea id="visiInput" rows="5"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="saveVisi()">Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal('visiModal')">Batal</button>
+        </div>
+    </div>
+
+    <!-- Misi Modal -->
+    <div id="misiModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('misiModal')">×</span>
+            <h2 id="misiModalTitle">Tambah Misi</h2>
+            <div class="form-group">
+                <label for="misiInput">Misi</label>
+                <textarea id="misiInput" rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="saveMisi()">Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal('misiModal')">Batal</button>
+        </div>
+    </div>
+
+    <!-- Sasaran Modal -->
+    <div id="sasaranModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('sasaranModal')">×</span>
+            <h2 id="sasaranModalTitle">Tambah Sasaran Mutu</h2>
+            <div class="form-group">
+                <label for="sasaranInput">Sasaran Mutu</label>
+                <textarea id="sasaranInput" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="targetInput">Target (%)</label>
+                <input type="number" id="targetInput" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label for="periodeInput">Periode Pengukuran</label>
+                <select id="periodeInput">
+                    <option value="Tahunan">Tahunan</option>
+                    <option value="Bulanan">Bulanan</option>
+                    <option value="Tahunan dan Bulanan">Tahunan dan Bulanan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="metodeInput">Metode Pengukuran</label>
+                <input type="text" id="metodeInput">
+            </div>
+            <button class="btn btn-primary" onclick="saveSasaran()">Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal('sasaranModal')">Batal</button>
+        </div>
+    </div>
+
+    <!-- Program Modal -->
+    <div id="programModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('programModal')">×</span>
+            <h2 id="programModalTitle">Tambah Program Kerja</h2>
+            <div class="form-group">
+                <label for="programNamaInput">Nama Program</label>
+                <input type="text" id="programNamaInput">
+            </div>
+            <div class="form-group">
+                <label for="programDeskripsiInput">Deskripsi</label>
+                <textarea id="programDeskripsiInput" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="programPjInput">Penanggung Jawab</label>
+                <input type="text" id="programPjInput">
+            </div>
+            <div class="form-group">
+                <label for="programUnitInput">Unit</label>
+                <select id="programUnitInput">
+                    <option value="" disabled selected>Pilih Unit...</option>
+                    <option value="PGTK">PGTK</option>
+                    <option value="SD">SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA">SMA</option>
+                    <option value="Litbang & SMM">Litbang & SMM</option>
+                    <option value="Keuangan & Marketing">Keuangan & Marketing</option>
+                    <option value="Umum">Umum</option>
+                    <option value="Ecopark">Ecopark</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="programTimelineInput">Timeline</label>
+                <input type="text" id="programTimelineInput">
+            </div>
+            <button class="btn btn-primary" onclick="saveProgram()">Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal('programModal')">Batal</button>
+        </div>
+    </div>
+
+    <!-- APBS Modal -->
+    <div id="apbsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('apbsModal')">×</span>
+            <h2 id="apbsModalTitle">Tambah Item APBS</h2>
+            <div class="form-group">
+                <label for="apbsKodeInput">Kode</label>
+                <input type="text" id="apbsKodeInput">
+            </div>
+            <div class="form-group">
+                <label for="apbsUraianInput">Uraian</label>
+                <textarea id="apbsUraianInput" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="apbsAnggaranInput">Anggaran (Rp)</label>
+                <input type="number" id="apbsAnggaranInput" min="0">
+            </div>
+            <div class="form-group">
+                <label for="apbsKeteranganInput">Keterangan</label>
+                <input type="text" id="apbsKeteranganInput">
+            </div>
+            <button class="btn btn-primary" onclick="saveAPBS()">Simpan</button>
+            <button class="btn btn-secondary" onclick="closeModal('apbsModal')">Batal</button>
+        </div>
+    </div>
+    <!-- ... (di dekat modal-modal lainnya di Index.html) ... -->
+
+    <!-- ============================================= -->
+    <!-- MODAL BARU UNTUK DETAIL PROGRAM KERJA -->
+    <!-- ============================================= -->
+    <div id="detailProgramModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('detailProgramModal')">×</span>
+            <h2 id="detailProgramTitle">Detail Program Kerja</h2>
+            <div id="detailProgramBody" class="detail-program-body">
+                <!-- Konten detail akan dimasukkan di sini oleh JavaScript -->
+                <div class="loader-small"></div>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModal('detailProgramModal')">Tutup</button>
+            </div>
+        </div>
+    </div>
+    <!-- TAMBAHKAN FOOTER DI SINI, DI LUAR CONTAINER -->
+    <footer class="footer">
+        <p>© 2024 An Nahl Islamic School. All Rights Reserved.</p>
+        <p>Dikembangkan dengan Google Apps Script</p>
+    </footer>
+
+    <?!= HtmlService.createTemplateFromFile('Javascript').evaluate().getContent(); ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+
+</html>

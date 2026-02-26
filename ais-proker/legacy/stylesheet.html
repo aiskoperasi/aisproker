@@ -1,0 +1,839 @@
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .header h1 {
+        color: #2c5530;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .header p {
+        color: #666;
+        font-size: 1.2rem;
+    }
+
+    .nav-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+
+    .nav-tab {
+        flex: 1;
+        padding: 15px 20px;
+        background: transparent;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        white-space: nowrap;
+        min-width: 120px;
+    }
+
+    .nav-tab:hover {
+        background: rgba(46, 125, 50, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .nav-tab.active {
+        background: linear-gradient(135deg, #2e7d32, #388e3c);
+        color: white;
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+    }
+
+    .content-section {
+        display: none;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease;
+    }
+
+    .content-section.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c5530;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #2e7d32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2e7d32, #388e3c);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #757575, #9e9e9e);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #d32f2f, #f44336);
+        color: white;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #f57c00, #ff9800);
+        color: white;
+    }
+
+    /* ================================================= */
+    /* === FINAL - SINKRONISASI HEADER & BODY TABEL === */
+    /* ================================================= */
+
+    /* Kontainer tabel utama */
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+        /* PENTING: Mengubah display tabel untuk kontrol penuh */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Mengatur Header (thead) dan Body (tbody) */
+    .table thead,
+    .table tbody {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Mengatur Baris Header (tr) dan Baris Body (tr) */
+    .table thead tr,
+    .table tbody tr {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(46, 125, 50, 0.05);
+    }
+
+    /* Mengatur Sel Header (th) dan Sel Data (td) agar konsisten */
+    .table th,
+    .table td {
+        padding: 15px;
+        text-align: left;
+        flex-grow: 1;
+        flex-basis: 0;
+    }
+
+    /* Sel Header (th) - Gaya spesifik */
+    .table th {
+        background: linear-gradient(135deg, #2e7d32, #388e3c);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Sel Data (td) - Gaya spesifik */
+    .table td {
+        /* tidak perlu style khusus lagi di sini */
+    }
+
+    /* Mengatur lebar kolom secara spesifik untuk HEADER DAN BODY */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        flex-grow: 0.2;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    /* No */
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        flex-grow: 1.5;
+        min-width: 180px;
+    }
+
+    /* Nama Program */
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        flex-grow: 2;
+        min-width: 200px;
+    }
+
+    /* Deskripsi */
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        flex-grow: 1;
+        min-width: 120px;
+    }
+
+    /* PJ */
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        flex-grow: 1;
+        min-width: 120px;
+    }
+
+    /* Unit (BARU) */
+    .table th:nth-child(6),
+    .table td:nth-child(6) {
+        flex-grow: 1;
+        min-width: 150px;
+    }
+
+    /* Timeline */
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+        flex-grow: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    /* Aksi */
+
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card h3 {
+        color: #2c5530;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .organization-chart {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .org-level {
+        margin: 20px 0;
+    }
+
+    .org-box {
+        display: inline-block;
+        background: linear-gradient(135deg, #2e7d32, #388e3c);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        margin: 5px;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+    }
+
+    .org-coordinator {
+        background: linear-gradient(135deg, #1976d2, #2196f3);
+    }
+
+    .org-member {
+        background: linear-gradient(135deg, #757575, #9e9e9e);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 30px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: #000;
+    }
+
+    .program-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #2e7d32;
+    }
+
+    .search-container {
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 16px;
+        background: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .responsive-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .nav-tabs {
+            flex-direction: column;
+        }
+
+        .nav-tab {
+            margin-bottom: 5px;
+        }
+
+        .table {
+            font-size: 14px;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
+            padding: 20px;
+        }
+    }
+
+        {
+        margin: 0;
+        padding: 0;
+        /* ... sisa CSS Anda ... */
+    }
+
+    /* ... sisa CSS Anda ... */
+    .responsive-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    /* ... */
+
+    /* --- CSS TAMBAHAN UNTUK MODIFIKASI --- */
+
+    /* 1. Loader (penanda loading data dari server) */
+    .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #2e7d32;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* 1. Modifikasi Sel Pembungkus Aksi */
+    .action-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        padding: 0;
+    }
+
+    /* 2. Modifikasi Ikon Aksi */
+    .action-icon {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+
+        /* MODIFIKASI UKURAN */
+        width: 30px;
+        /* Perkecil lebar dari 35px */
+        height: 30px;
+        /* Perkecil tinggi dari 35px */
+
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        color: white;
+
+        /* MODIFIKASI UKURAN FONT IKON */
+        font-size: 14px;
+        /* Perkecil font ikon dari 16px */
+
+        /* HAPUS margin: 0 5px; karena kita sudah menggunakan 'gap' */
+    }
+
+    .action-icon.edit {
+        background: linear-gradient(135deg, #f57c00, #ff9800);
+    }
+
+    .action-icon.delete {
+        background: linear-gradient(135deg, #d32f2f, #f44336);
+    }
+
+    .action-icon.info {
+        background: linear-gradient(135deg, #1976d2, #2196f3);
+    }
+
+    .action-icon:hover {
+        transform: translateY(-2px) scale(1.1);
+        /* Sedikit kurangi efek hover */
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Menambahkan sedikit margin pada ikon di dalam tombol utama */
+    .btn i {
+        margin-right: 8px;
+    }
+
+    /* Tambahkan di dekat style action-icon lainnya */
+    .action-icon.info {
+        background: linear-gradient(135deg, #1976d2, #2196f3);
+        /* Warna biru */
+    }
+
+    .action-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ======================================= */
+    /* === STYLE UNTUK LOGO DAN FOOTER === */
+    /* ======================================= */
+
+    /* 1. Menata Kontainer Header */
+    .header-content {
+        display: flex;
+        align-items: center;
+        /* Membuat logo dan blok teks sejajar secara vertikal */
+        justify-content: center;
+        /* Memposisikan konten di tengah secara horizontal */
+        gap: 30px;
+        /* PERBESAR jarak antara logo dan teks menjadi 30px */
+        flex-wrap: wrap;
+        width: 100%;
+        /* Pastikan kontainer menggunakan lebar penuh */
+        padding: 0 20px;
+        /* Beri sedikit padding agar tidak mepet ke tepi */
+    }
+
+    /* 2. Menata Logo */
+    .header-logo {
+        height: 88px;
+        /* Sedikit disesuaikan agar proporsional */
+        width: auto;
+        object-fit: contain;
+        /* TAMBAHKAN INI untuk memberi sedikit ruang jika diperlukan */
+        margin-right: 15px;
+    }
+
+    /* 3. Menata Blok Teks (Judul dan Sub-judul) */
+    .header-text {
+        /* HAPUS 'text-align: left;' */
+        /* TAMBAHKAN properti flexbox ini */
+        display: flex;
+        flex-direction: column;
+        /* Membuat h1 dan p tersusun ke bawah */
+        align-items: flex-start;
+        /* MEMBUAT SEMUA TEKS RATA KIRI */
+        justify-content: center;
+        /* Menyelaraskan secara vertikal di tengah bloknya */
+    }
+
+    /* 2. Menata Footer */
+    .footer {
+        text-align: center;
+        padding: 25px;
+        margin-top: 40px;
+        background: rgba(0, 0, 0, 0.1);
+        /* Warna latar belakang semi-transparan */
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f0f0f0;
+        /* Warna teks terang agar kontras dengan background gradient */
+        font-size: 14px;
+    }
+
+    /* Biarkan style h1 dan p bawaan dari .header asli */
+    .header h1 {
+        margin-bottom: 5px;
+        /* Kurangi sedikit margin bawah agar lebih rapat */
+    }
+
+    .footer p {
+        margin: 5px 0;
+        opacity: 0.8;
+    }
+
+    /* 1. Jadikan header sebagai kontainer referensi posisi */
+    .header {
+        position: relative;
+        /* Ini adalah kunci agar posisi absolut bekerja di dalamnya */
+        padding-bottom: 60px;
+        /* Beri ruang di bawah untuk tombol agar tidak tumpang tindih */
+    }
+
+    /* 2. Atur posisi div pembungkus tombol */
+    .header-actions {
+        position: absolute;
+        /* Posisikan secara absolut relatif terhadap .header */
+        bottom: 15px;
+        /* Jarak 15px dari bawah header */
+        right: 20px;
+        /* Jarak 20px dari kanan header */
+    }
+
+    /* 3. (Opsional) Sedikit penyesuaian pada tombol itu sendiri jika perlu */
+    .header-actions .btn {
+        font-size: 14px;
+        /* Perkecil sedikit font tombol agar tidak terlalu dominan */
+        padding: 8px 16px;
+    }
+
+    /* Penyesuaian untuk layar kecil */
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            /* Ubah tata letak menjadi kolom di layar kecil */
+            gap: 15px;
+        }
+
+        .header-text {
+            /* Hapus text-align: center; karena align-items lebih kuat */
+            /* MODIFIKASI KUNCI: Ubah perataan horizontal menjadi center */
+            align-items: center;
+        }
+
+        .header-logo {
+            height: 60px;
+            /* Perkecil logo di layar kecil */
+            margin-right: 0;
+            /* Hapus margin kanan pada tampilan mobile */
+        }
+
+        /* Ini bagian opsional, untuk membuat navigasi lebih baik di mobile */
+        .nav-tabs {
+            flex-direction: column;
+            align-items: stretch;
+            /* Membuat tombol selebar kontainer */
+        }
+
+        .nav-tab {
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .header {
+            /* Hapus padding-bottom atau sesuaikan jika perlu */
+            padding-bottom: 20px;
+        }
+
+        .header-actions {
+            position: static;
+            /* Kembalikan ke posisi normal (tidak absolut) */
+            width: 100%;
+            margin-top: 20px;
+            /* Beri jarak dari atas */
+            display: flex;
+            justify-content: center;
+            /* Tombol berada di tengah */
+        }
+    }
+
+    /* ============================================= */
+    /* CSS UNTUK MODAL DETAIL PROGRAM */
+    /* ============================================= */
+    .detail-program-body {
+        margin-top: 20px;
+        max-height: 60vh;
+        /* Batasi tinggi agar bisa di-scroll jika konten panjang */
+        overflow-y: auto;
+        padding-right: 15px;
+        /* Beri ruang untuk scrollbar */
+    }
+
+    .detail-item {
+        margin-bottom: 18px;
+    }
+
+    .detail-item h4 {
+        color: #2c5530;
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 5px;
+    }
+
+    .detail-item p {
+        margin: 0;
+        padding: 5px 0;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        /* Agar baris baru (enter) di data tetap ditampilkan */
+    }
+
+    .detail-item .currency {
+        font-weight: bold;
+        font-size: 1.1em;
+        color: #2e7d32;
+    }
+
+    /* Loader kecil untuk di dalam modal */
+    .loader-small {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #2e7d32;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    /* CSS untuk Kontainer Filter */
+    .filter-container {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+
+    .search-input,
+    .filter-select {
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus,
+    .filter-select:focus {
+        outline: none;
+        border-color: #2e7d32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    .search-input {
+        flex-grow: 2;
+        /* Biarkan kotak pencarian lebih lebar */
+    }
+
+    .filter-select {
+        flex-grow: 1;
+        cursor: pointer;
+    }
+
+    /* CSS untuk Kontainer Grafik */
+    .chart-container {
+        padding: 20px;
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-container h3 {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* TAMBAHKAN CSS BARU INI */
+    .chart-wrapper {
+        position: relative;
+        /* Atur tinggi dan lebar di sini, BUKAN di .chart-container */
+        height: 350px;
+        /* Anda bisa sesuaikan nilai ini */
+        width: 100%;
+        max-width: 450px;
+        /* Batasi lebar maksimum agar tidak terlalu besar di layar lebar */
+        margin: 0 auto;
+        /* Pusatkan wrapper di dalam kontainernya */
+    }
+</style>

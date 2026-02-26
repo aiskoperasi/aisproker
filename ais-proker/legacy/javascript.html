@@ -1,0 +1,432 @@
+<script>
+    // =========================================================
+    // BAGIAN 1: VARIABEL GLOBAL & INISIALISASI
+    // =========================================================
+    let data = {}; // Objek utama untuk menyimpan semua data dari server
+    let currentEditId = null;
+    let currentEditType = null;
+    let myBudgetChart = null; // Variabel global untuk menyimpan instance grafik
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadInitialData();
+    });
+
+    function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+
+    // =========================================================
+    // BAGIAN 2: KOMUNIKASI DENGAN SERVER (APPS SCRIPT)
+    // =========================================================
+    function loadInitialData() {
+        showLoader();
+        google.script.run.withSuccessHandler(onDataLoaded).withFailureHandler(onFailure).getAllData();
+    }
+
+    function onDataLoaded(serverData) {
+        console.log("Data diterima dari server:", serverData);
+        if (serverData.error) {
+            alert("Gagal memuat data: " + serverData.error);
+            hideLoader();
+            return;
+        }
+        data = serverData;
+        renderAll(data);
+        hideLoader();
+    }
+
+    function onFailure(error) {
+        alert("Terjadi kesalahan komunikasi dengan server: " + error.message);
+        hideLoader();
+    }
+
+    function handleSaveSuccess(response) {
+        alert(response.message);
+        loadInitialData();
+    }
+
+    // =========================================================
+    // BAGIAN 3: RENDER (MENAMPILKAN SEMUA DATA KE HALAMAN)
+    // =========================================================
+    function renderAll(data) {
+        renderVisi(data);
+        renderMisi(data);
+        renderSasaran(data);
+        renderProgram(null); // Panggil dengan null agar menggunakan data global & filter
+        renderAPBS(data);
+        updateStats(data);
+        renderBudgetChart(data);
+    }
+
+    // --- FUNGSI RENDER SPESIFIK ---
+
+    function renderVisi(data) {
+        document.getElementById('visiContent').innerHTML = `<p>${data.visi || 'Visi belum diatur.'}</p>`;
+        document.getElementById('visiInput').value = data.visi || '';
+    }
+
+    function renderMisi(data) {
+        const list = document.getElementById('misiList');
+        list.innerHTML = '';
+        (data.misi || []).forEach((misi, index) => {
+            const item = document.createElement('div');
+            item.className = 'program-item';
+            item.innerHTML = `
+            <div style="flex-grow: 1;">${index + 1}. ${misi}</div>
+            <div style="margin-left: 20px; display: flex; gap: 10px;">
+                <span class="action-icon edit" title="Edit" onclick="editMisi(${index})"><i class="fas fa-pencil-alt"></i></span>
+                <span class="action-icon delete" title="Hapus" onclick="deleteMisi(${index})"><i class="fas fa-trash-alt"></i></span>
+            </div>
+        `;
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            list.appendChild(item);
+        });
+    }
+
+    function renderSasaran(data) {
+        const tbody = document.getElementById('sasaranTableBody');
+        tbody.innerHTML = '';
+        (data.sasaran || []).forEach((item, index) => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.sasaran || ''}</td>
+            <td>${item.target || 0}%</td>
+            <td>${item.periode || ''}</td>
+            <td>${item.metode || ''}</td>
+            <td class="action-cell">
+                <span class="action-icon edit" title="Edit" onclick="editItem('sasaran', '${item.id}')"><i class="fas fa-pencil-alt"></i></span>
+                <span class="action-icon delete" title="Hapus" onclick="deleteItem('sasaran', '${item.id}')"><i class="fas fa-trash-alt"></i></span>
+            </td>
+        `;
+        });
+    }
+
+    function renderProgram(programData) {
+        const tbody = document.getElementById('programTableBody');
+        tbody.innerHTML = '';
+        const dataToRender = programData || (data.program || []);
+        if (dataToRender.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">Tidak ada data yang cocok.</td></tr>';
+            return;
+        }
+        dataToRender.forEach((item, index) => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.nama || ''}</td>
+            <td>${item.deskripsi || ''}</td>
+            <td>${item.pj || ''}</td>
+            <td>${item.unit || ''}</td>
+            <td>${item.timeline || ''}</td>
+            <td class="action-cell">
+                <span class="action-icon info" title="Lihat Detail" onclick="showProgramDetail('${item.id}')"><i class="fas fa-info-circle"></i></span>
+                <span class="action-icon edit" title="Edit" onclick="editItem('program', '${item.id}')"><i class="fas fa-pencil-alt"></i></span>
+                <span class="action-icon delete" title="Hapus" onclick="deleteItem('program', '${item.id}')"><i class="fas fa-trash-alt"></i></span>
+            </td>
+        `;
+        });
+    }
+
+    function renderAPBS(data) {
+        const tbody = document.getElementById('apbsTableBody');
+        tbody.innerHTML = '';
+        let totalAnggaran = 0;
+        (data.apbs || []).forEach(item => {
+            const row = tbody.insertRow();
+            totalAnggaran += Number(item.anggaran || 0);
+            row.innerHTML = `
+            <td>${item.kode || ''}</td>
+            <td>${item.uraian || ''}</td>
+            <td>Rp ${Number(item.anggaran || 0).toLocaleString('id-ID')}</td>
+            <td>${item.keterangan || ''}</td>
+            <td class="action-cell">
+                <span class="action-icon edit" title="Edit" onclick="editItem('apbs', '${item.id}')"><i class="fas fa-pencil-alt"></i></span>
+                <span class="action-icon delete" title="Hapus" onclick="deleteItem('apbs', '${item.id}')"><i class="fas fa-trash-alt"></i></span>
+            </td>
+        `;
+        });
+        document.getElementById('totalAnggaran2').textContent = `Rp ${totalAnggaran.toLocaleString('id-ID')}`;
+    }
+
+    function updateStats(data) {
+        const totalSasaranEl = document.getElementById('totalSasaran');
+        const totalProgramEl = document.getElementById('totalProgram');
+        const totalAnggaranEl = document.getElementById('totalAnggaran');
+        if (totalSasaranEl) totalSasaranEl.textContent = (data.sasaran || []).length;
+        if (totalProgramEl) totalProgramEl.textContent = (data.program || []).length;
+        if (totalAnggaranEl) {
+            const total = (data.apbs || []).reduce((sum, item) => sum + (parseFloat(item.anggaran) || 0), 0);
+            totalAnggaranEl.textContent = Math.round(total / 1000000);
+        }
+    }
+
+
+    // GANTI FUNGSI renderBudgetChart YANG LAMA DENGAN VERSI BARU INI
+
+    function renderBudgetChart(data) {
+        if (!data || !data.apbs || data.apbs.length === 0) {
+            return;
+        }
+
+        // ===============================================
+        // KATEGORI YANG SUDAH DISESUAIKAN
+        // ===============================================
+        const categoryMap = {
+            '51411': 'Pemeliharaan dan Perbaikan',
+            '51412': 'Administrasi dan Umum',
+            '51413': 'Energi dan Komunikasi',
+            '51414': 'Perlengkapan',
+            '51415': 'Investasi Sekolah'
+        };
+
+        // Fungsi untuk mendapatkan nama kategori dari kode
+        const getCategoryName = (code) => {
+            const categoryCode = (code || "").substring(0, 5);
+            return categoryMap[categoryCode] || 'Lain-lain';
+        };
+        // ===============================================
+
+        // 1. Proses dan Kelompokkan Data menggunakan pemetaan baru
+        const budgetByCategory = {};
+        data.apbs.forEach(item => {
+            const categoryName = getCategoryName(item.kode);
+            if (!budgetByCategory[categoryName]) {
+                budgetByCategory[categoryName] = 0;
+            }
+            // MODIFIKASI KUNCI: Gunakan logika yang sama amannya di sini
+            const anggaran = parseFloat(item.anggaran) || 0;
+            budgetByCategory[categoryName] += anggaran;
+        });
+
+        // 2. Siapkan data untuk Chart.js
+        const labels = Object.keys(budgetByCategory);
+        const chartData = Object.values(budgetByCategory);
+
+        // 3. Siapkan warna-warni
+        const backgroundColors = [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 159, 64, 0.7)'
+        ];
+
+        // 4. Render Grafik
+        const ctx = document.getElementById('budgetChart');
+        if (!ctx) {
+            console.error("Elemen canvas 'budgetChart' tidak ditemukan.");
+            return;
+        }
+
+        if (myBudgetChart) {
+            myBudgetChart.destroy();
+        }
+
+        myBudgetChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Anggaran',
+                    data: chartData,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function clearForm(modalId) {
+        const form = document.getElementById(modalId).querySelector('.modal-content');
+        form.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+    }
+
+    function openModal(modalId) {
+        currentEditId = null;
+        currentEditType = null;
+        clearForm(modalId);
+        const titleEl = document.getElementById(modalId.replace('Modal', 'ModalTitle'));
+        if (titleEl) titleEl.textContent = titleEl.textContent.replace('Edit', 'Tambah');
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function applyFilters() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const unitFilter = document.getElementById('unitFilter').value;
+        let filteredData = data.program || [];
+        if (unitFilter) {
+            filteredData = filteredData.filter(item => item.unit === unitFilter);
+        }
+        if (searchText) {
+            filteredData = filteredData.filter(item =>
+                (item.nama || '').toLowerCase().includes(searchText) ||
+                (item.deskripsi || '').toLowerCase().includes(searchText) ||
+                (item.pj || '').toLowerCase().includes(searchText)
+            );
+        }
+        renderProgram(filteredData);
+    }
+
+    function showProgramDetail(id) {
+        const modal = document.getElementById('detailProgramModal');
+        const body = document.getElementById('detailProgramBody');
+        body.innerHTML = '<div class="loader-small"></div>';
+        modal.style.display = 'block';
+        google.script.run
+            .withSuccessHandler(response => {
+                if (response.success) {
+                    const item = response.data;
+                    const formattedAnggaran = `Rp ${Number(item.anggaran || 0).toLocaleString('id-ID')}`;
+                    body.innerHTML = `
+                    <div class="detail-item"><h4>Deskripsi Program</h4><p>${item.deskripsi || 'N/A'}</p></div>
+                    <div class="detail-item"><h4>Penanggung Jawab (PJ)</h4><p>${item.pj || 'N/A'}</p></div>
+                    <div class="detail-item"><h4>Timeline Pelaksanaan</h4><p>${item.timeline || 'N/A'}</p></div>
+                    <div class="detail-item"><h4>Anggaran</h4><p class="currency">${formattedAnggaran}</p></div>
+                    <div class="detail-item"><h4>Indikator Keberhasilan</h4><p>${item.indikator || 'N/A'}</p></div>
+                    <div class="detail-item"><h4>Catatan Tambahan</h4><p>${item.catatan || 'N/A'}</p></div>
+                `;
+                    document.getElementById('detailProgramTitle').textContent = item.nama;
+                } else {
+                    body.innerHTML = `<p style="color: red;">Gagal memuat detail: ${response.message}</p>`;
+                }
+            })
+            .withFailureHandler(error => {
+                body.innerHTML = `<p style="color: red;">Terjadi kesalahan: ${error.message}</p>`;
+            })
+            .getProgramById(id);
+    }
+
+    function editMisi(index) {
+        currentEditId = index;
+        currentEditType = 'misi';
+        document.getElementById('misiInput').value = data.misi[index];
+        document.getElementById('misiModalTitle').textContent = 'Edit Misi';
+        document.getElementById('misiModal').style.display = 'block';
+    }
+
+    function editItem(type, id) {
+        const item = data[type].find(d => d.id == id);
+        if (!item) { alert(`Error: Item tidak ditemukan untuk tipe: ${type} dengan ID: ${id}`); return; }
+        currentEditId = id;
+        currentEditType = type;
+        if (type === 'sasaran') {
+            document.getElementById('sasaranModalTitle').textContent = 'Edit Sasaran Mutu';
+            document.getElementById('sasaranInput').value = item.sasaran;
+            document.getElementById('targetInput').value = item.target;
+            document.getElementById('periodeInput').value = item.periode;
+            document.getElementById('metodeInput').value = item.metode;
+            document.getElementById('sasaranModal').style.display = 'block';
+        } else if (type === 'program') {
+            document.getElementById('programModalTitle').textContent = 'Edit Program Kerja';
+            document.getElementById('programNamaInput').value = item.nama;
+            document.getElementById('programDeskripsiInput').value = item.deskripsi;
+            document.getElementById('programPjInput').value = item.pj;
+            document.getElementById('programUnitInput').value = item.unit;
+            document.getElementById('programTimelineInput').value = item.timeline;
+            document.getElementById('programModal').style.display = 'block';
+        } else if (type === 'apbs') {
+            document.getElementById('apbsModalTitle').textContent = 'Edit Item APBS';
+            document.getElementById('apbsKodeInput').value = item.kode;
+            document.getElementById('apbsUraianInput').value = item.uraian;
+            document.getElementById('apbsAnggaranInput').value = item.anggaran;
+            document.getElementById('apbsKeteranganInput').value = item.keterangan;
+            document.getElementById('apbsModal').style.display = 'block';
+        }
+    }
+
+    function deleteMisi(index) {
+        if (confirm('Apakah Anda yakin ingin menghapus misi ini?')) {
+            showLoader();
+            let updatedMisi = [...data.misi];
+            updatedMisi.splice(index, 1);
+            google.script.run.withSuccessHandler(handleSaveSuccess).withFailureHandler(onFailure).saveData('misi', { misi: updatedMisi });
+        }
+    }
+
+    function deleteItem(type, id) {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            showLoader();
+            google.script.run.withSuccessHandler(handleSaveSuccess).withFailureHandler(onFailure).deleteData(type, id);
+        }
+    }
+
+    function saveVisi() { showLoader(); const visiValue = document.getElementById('visiInput').value; google.script.run.withSuccessHandler(r => { closeModal('visiModal'); handleSaveSuccess(r); }).withFailureHandler(onFailure).saveData('visi', { visi: visiValue }); }
+    function saveMisi() { showLoader(); const misiInput = document.getElementById('misiInput').value.trim(); if (!misiInput) { alert("Misi tidak boleh kosong."); hideLoader(); return; } let updatedMisi = [...(data.misi || [])]; if (currentEditId !== null && currentEditType === 'misi') { updatedMisi[currentEditId] = misiInput; } else { updatedMisi.push(misiInput); } google.script.run.withSuccessHandler(r => { closeModal('misiModal'); handleSaveSuccess(r); }).withFailureHandler(onFailure).saveData('misi', { misi: updatedMisi }); }
+    function saveSasaran() { showLoader(); const sasaranData = { id: currentEditId, sasaran: document.getElementById('sasaranInput').value, target: document.getElementById('targetInput').value, periode: document.getElementById('periodeInput').value, metode: document.getElementById('metodeInput').value }; google.script.run.withSuccessHandler(r => { closeModal('sasaranModal'); handleSaveSuccess(r); }).withFailureHandler(onFailure).saveData('sasaran', sasaranData); }
+    function saveProgram() { showLoader(); const programData = { id: currentEditId, nama: document.getElementById('programNamaInput').value, deskripsi: document.getElementById('programDeskripsiInput').value, pj: document.getElementById('programPjInput').value, unit: document.getElementById('programUnitInput').value, timeline: document.getElementById('programTimelineInput').value }; google.script.run.withSuccessHandler(r => { closeModal('programModal'); handleSaveSuccess(r); }).withFailureHandler(onFailure).saveData('program', programData); }
+    function saveAPBS() { showLoader(); const apbsData = { id: currentEditId, kode: document.getElementById('apbsKodeInput').value, uraian: document.getElementById('apbsUraianInput').value, anggaran: document.getElementById('apbsAnggaranInput').value, keterangan: document.getElementById('apbsKeteranganInput').value }; google.script.run.withSuccessHandler(r => { closeModal('apbsModal'); handleSaveSuccess(r); }).withFailureHandler(onFailure).saveData('apbs', apbsData); }
+
+    // =========================================================
+    // BAGIAN 7: FUNGSI EKSPOR PDF (YANG HILANG)
+    // =========================================================
+
+    function exportToPdf() {
+        const btn = document.getElementById('exportPdfBtn');
+        // Ubah teks tombol dan nonaktifkan untuk mencegah klik ganda
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengekspor...';
+        btn.disabled = true;
+
+        // Panggil fungsi di sisi server
+        google.script.run
+            .withSuccessHandler(response => {
+                // Kembalikan tombol ke keadaan semula
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> Ekspor ke PDF';
+                btn.disabled = false;
+
+                if (response.success) {
+                    alert("PDF berhasil dibuat! Unduhan akan segera dimulai.");
+                    // Buka URL unduhan di tab baru
+                    window.open(response.downloadUrl, '_blank');
+                } else {
+                    alert("Gagal membuat PDF: " + response.message);
+                    console.error("PDF Export Error:", response.message);
+                }
+            })
+            .withFailureHandler(error => {
+                // Kembalikan tombol jika terjadi error
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> Ekspor ke PDF';
+                btn.disabled = false;
+                alert("Terjadi kesalahan saat ekspor: " + error.message);
+                console.error("PDF Export Failure:", error);
+            })
+            .exportAllDataAsPdf();
+    }
+</script>
